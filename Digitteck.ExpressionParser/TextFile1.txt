@@ -1,0 +1,14 @@
+﻿
+7. DO : string aaa = "Rooms.Area / SqmForPerson"; where Rooms is collection of rooms
+   IntentionalAnalyzer
+9. In the evaluator paramNames and fnNames are passed by array of string. Check if we can dynamically add
+parameters
+
+Double - conversion error (too large no)
+
+Rooms.Data - not a number
+
+MaxRange int + maxRange int
+
+Fn Casting 
+ //TODO : Large nu - insert limits and autocasts on opereations
