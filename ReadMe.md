@@ -441,14 +441,13 @@ Trying to get the parameter component out of a string
 <h3>3.10 Add a new Operator</h3>
 
 To add a new operator you have several steps to accomplish and for this I will present an added operator
-
-**1. In class ExprOptions**
+- In class ExprOptions
 
 ```
 public List<char> AllowedOperators = "+-^*/%".ToList();
 public char OperatorPlusSign = '+';
 ```
-**2. Enum OperatorType**
+- Enum OperatorType
 
  
 ```
@@ -463,7 +462,7 @@ public enum OperatorType
     }
 ```
 
-**3. Class ExprOperatorComponent**
+- Class ExprOperatorComponent
 
  
 ```
@@ -497,7 +496,7 @@ public static ExprComponent Create(char charOp, ExprOptions exprOptions)
         }
 ```
 
-**4. Class ExprModel – define operator strategies**
+- Class ExprModel – define operator strategies
 
  
 ```
@@ -512,7 +511,7 @@ Dictionary<OperatorType, IOperation> opStrategies = new Dictionary<OperatorType,
             };
 ```
 
-**5. In PrimaryOperations there is one class for each operation**
+- In PrimaryOperations there is one class for each operation
 
  
 ```
@@ -530,7 +529,7 @@ public class Add : IOperation
     }
 ```
 
-**6. The EvalAndOp method evaluates expressions and attempts to get appropiate parameters.** It also provides means to check parameters before the operation (needed for /0 division)
+- The EvalAndOp method evaluates expressions and attempts to get appropiate parameters.** It also provides means to check parameters before the operation (needed for /0 division)
 
          
 ```
@@ -550,7 +549,7 @@ public string Context { get; protected set; }
    public ParameterObject ParameterBase { get; private set; }
 ```
 
-**7. The ParameterBase class provide abstract methods to implement these operations:**
+- The ParameterBase class provide abstract methods to implement these operations:
 
  
 ```
@@ -562,7 +561,7 @@ public abstract Parameter Op_Mod(Parameter other);
 public abstract Parameter Op_Pow(Parameter other);
 ```
 
-**8. Each Parameter class overrides the above method but redirects action to a sepparate class that handles also overflow data**
+- Each Parameter class overrides the above method but redirects action to a sepparate class that handles also overflow data
 
   
 ```
@@ -584,7 +583,7 @@ public override Parameter Op_Add(Parameter other)
         }
 ```
 
-**9. An example of the final operation in the overflow class:**
+- An example of the final operation in the overflow class:
 
 
 ```
