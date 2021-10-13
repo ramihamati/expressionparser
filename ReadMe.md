@@ -1036,4 +1036,196 @@ public static ExprComponent Create(string context,
 ```
 
 <h3>6.3 ExprFunctionComponent</h3>
+ExprFunctionComponent stores the FunctionBase representing the function to be invoked and the values passed as arguments.
 
+**Syntax**
+
+`public class ExprFunctionComponent : ExprComponent`
+
+**Properties**
+
+```
+public FunctionBase FunctionBase { get; set; }
+
+public List<ExprComplexComponent> Arguments { get; private set; }
+```
+
+**Create**
+
+```
+public static ExprComponent Create(string expression, ExprOptions exprOptions,
+                                    FunctionBase functionBase,
+                                    Func<string, ExprComponent> CreateComplexComponent)
+```
+<h3>6.4 ExprNumericComponent</h3>
+
+ExprNumericComponent just stores the string that would represent the number. This number is then converted to a parameter using the Parameter Manager method TryGetNumberComponent.
+
+**Syntax**
+`public class ExprNumericComponent : ExprComponent`
+
+**Create**
+`public static ExprComponent Create(string expression, ExprOptions exprOptions)`
+
+<h3>6.5 ExprOperatorComponent</h3>
+
+**Syntax**
+`public class ExprOperatorComponent : ExprComponent`
+
+**Properties**
+`public OperatorType OperatorType { get; set; }`
+
+**Create**
+A string with length equals to 1
+
+`public static ExprComponent Create(string expression, ExprOptions exprOptions, OperatorType operatorType)`
+`public static ExprComponent Create(char charOp, ExprOptions exprOptions)`
+
+**Operator Type**
+
+  
+```
+public enum OperatorType
+    {
+        Plus,
+        Minus,
+        Multiply,
+        Divide,
+        Mod,
+        Power
+    }
+```
+
+<h3>6.6 ExprParameterComponent</h3>
+
+
+ExprParameterComponent stores the ParameterObject and if the object is an instance it also stores the BindingMap to that property.
+
+For the myRoom object the BindingMap is “Spatial.Area”
+
+```
+ParameterInstance myRoom = new ParameterInstance("myRoom", new Room { Spatial = new Spatial { Area = 100.5, Perimeter = 22.5} });
+String expr12 = "myRoom.Spatial.Area + Sqrt(myRoom.Spatial.Perimeter)";
+```
+
+**Syntax**
+`public class ExprParameterComponent : ExprComponent`
+
+**Properties**
+
+```
+public ParameterObject ParameterBase { get; private set; }
+public string MapToProperty { get; set; }
+public bool IsEnumerable { get; protected set; }
+```
+
+**Create**
+
+```
+public static ExprComponent Create
+            (ExprOptions exprOptions, ParameterObject parameterBase, string mapToProperty = "")
+```
+
+<h3>6.7 ExprInvalidComponent</h3>
+
+**Syntax**
+`public class ExprInvalidComponent : ExprComponent`
+
+**Properties**
+`public string ErrorMessage { get; set; }`
+
+**Constructor**
+
+
+```
+public ExprInvalidComponent(string ExpressionString, ExprOptions exprOptions, string errorMessage="") 
+            : base(ExpressionString, exprOptions)
+```
+
+<h2>7. ExprModel</h2>
+
+The expression model comes in the worflow after the expression was validated and correcter (ExprValidateAndCorrect), after the functions have been defined (FunctionWrapper), after the parameters were collected (ExprParameter) and after the expression was decomposed intro ExprComponents.
+
+This class handles the evaluation of each component and combining them into a final result
+
+<h3>7.1 ExprModel</h3>
+
+**Syntax**
+`public class ExprModel : IExprModel`
+
+**Properties**
+
+```
+private FunctionProvider FunctionProvider { get; set; }
+private ParameterCollection ParameterCollection { get; set; }
+public ExprComponent ExprComponent { get; private set; }
+public string Context { get; private set; }
+public string CorrectedContext { get; private set; }
+public ExprOptions ExprOptions { get; private set; }
+```
+
+**Methods**
+`public EvaluateComponentResult<ExprComponent> GetResult()`
+
+**EvaluateComponentResult**
+
+ 
+```
+public class EvaluateComponentResult<T> where T: ExprComponent
+    {
+        public T ExprComponent { get; set; }
+
+        public bool IsValid { get; set; }
+
+        public string ErrorMessage { get; set; }
+    }
+```
+
+<h3>7.2 ExprModelInvalidComponent</h3>
+
+**Syntax**
+ `public class ExprModelInvalidComponent : IExprModel`
+
+**Properties**
+
+
+```
+public EvaluateComponentResult<ExprComponent> GetResult() => null;
+public string Context { get; }
+public string CorrectedContext { get; }
+public ExprInvalidComponent ExprInvalidComponent { get; private set; }
+```
+
+<h3>7.3 ExprModelNotValidated</h3>
+
+**Syntax**
+`public class ExprModelNotValidated : IExprModel`
+
+**Properties**
+
+
+```
+public EvaluateComponentResult<ExprComponent> GetResult() => null;
+public string Context { get; }
+public string CorrectedContext { get; }
+public ValidationResult ValidationResult { get; private set; }
+```
+
+<h2>8. ExpressionFabric</h2>
+
+The ExpressionFabric creats the environment for creating the expression models. It receives the FunctionProvider and ParameterCollection as arguments.
+
+**Syntax**
+
+ `public class ExpressionFabric`
+
+**Create**
+
+`public static ExpressionFabric Create(FunctionProvider functionProvider,ParameterCollection parameterCollection)`
+
+**Create a model**
+
+CreateModel will receive as input a string. The expression is then validated and corrected. If this process succeeds the expression is then decomposed into a tree and checked for invalid components.
+The return is a decomposed clean tree for final evaluation
+
+`public IExprModel CreateModel(string expressionString)`
